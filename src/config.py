@@ -36,6 +36,7 @@ class AppConfig:
     filter_substring: str
     max_depth: int
     reverse_mode: bool
+    output_file: str
 
 
 def load_toml(path: Path) -> dict:
@@ -130,6 +131,10 @@ def validate(data: dict) -> AppConfig:
     if not isinstance(reverse_mode, bool):
         raise ConfigTypeError("reverse_mode должен быть true/false")
 
+    output_file = data.get("output_file", "graph.svg")
+    if not isinstance(output_file, str):
+        raise ConfigTypeError("output_file должен быть строкой")
+
     return AppConfig(
         package_name=data["package_name"],
         repository_source=data["repository_source"],
@@ -137,6 +142,7 @@ def validate(data: dict) -> AppConfig:
         filter_substring=data["filter_substring"],
         max_depth=max_depth,
         reverse_mode=reverse_mode,
+        output_file=output_file,
     )
 
 

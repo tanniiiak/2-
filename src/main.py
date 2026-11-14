@@ -17,7 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Собирает парсер аргументов командной строки."""
     parser = argparse.ArgumentParser(
         prog="depviz",
-        description="Визуализатор графа (этап 1-4).",
+        description="Визуализатор графа (этап 1-5).",
     )
     parser.add_argument(
         "-c",
@@ -51,6 +51,7 @@ def print_config(config: AppConfig) -> None:
     )
     print(f"max_depth={format_value(config.max_depth)}")
     print(f"reverse_mode={format_value(config.reverse_mode)}")
+    print(f"output_file={format_value(config.output_file)}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -106,6 +107,18 @@ def main(argv: list[str] | None = None) -> int:
     )
     for dep in deps:
         print(f"  - {dep}")
+
+    from src.visualizer import generate_plantuml, save_svg, save_plantuml
+    print("---")
+    print(f"Генерация визуализации в {config.output_file}...")
+    try:
+        plantuml = generate_plantuml(graph, config.package_name)
+        save_plantuml(plantuml, config.output_file)
+        save_svg(graph, config.output_file)
+        print("Успешно сохранено!")
+    except Exception as exc:
+        print(f"Ошибка визуализации: {exc}", file=sys.stderr)
+        return EXIT_CONFIG_ERROR
             
     return EXIT_OK
 

@@ -1,0 +1,10 @@
+@startuml
+skinparam monochrome true
+"A" --> "B"
+"A" --> "C"
+"B" --> "D"
+"C" --> "A"
+"D" --> "E"
+"X-dev" --> "Y"
+"A"
+@enduml
