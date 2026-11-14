@@ -34,6 +34,7 @@ class AppConfig:
     repository_source: str
     work_mode: str
     filter_substring: str
+    max_depth: int
 
 
 def load_toml(path: Path) -> dict:
@@ -119,11 +120,17 @@ def validate(data: dict) -> AppConfig:
         check_online_source(data)
     else:
         check_test_source(data)
+        
+    max_depth = data.get("max_depth", 3)
+    if not isinstance(max_depth, int):
+        raise ConfigTypeError("max_depth должен быть числом")
+
     return AppConfig(
         package_name=data["package_name"],
         repository_source=data["repository_source"],
         work_mode=data["work_mode"],
         filter_substring=data["filter_substring"],
+        max_depth=max_depth,
     )
 
 

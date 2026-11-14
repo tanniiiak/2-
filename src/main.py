@@ -6,6 +6,7 @@ from pathlib import Path
 
 from src.config import AppConfig, load_config
 from src.errors import ConfigError
+from src.bfs import bfs_dependencies
 
 EXIT_OK = 0
 EXIT_CONFIG_ERROR = 1
@@ -16,7 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Собирает парсер аргументов командной строки."""
     parser = argparse.ArgumentParser(
         prog="depviz",
-        description="Визуализатор графа (этап 1-2).",
+        description="Визуализатор графа (этап 1-3).",
     )
     parser.add_argument(
         "-c",
@@ -48,6 +49,7 @@ def print_config(config: AppConfig) -> None:
         "filter_substring="
         f"{format_value(config.filter_substring)}"
     )
+    print(f"max_depth={format_value(config.max_depth)}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -67,6 +69,7 @@ def main(argv: list[str] | None = None) -> int:
     print_config(config)
     print("---")
     
+    graph = {}
     if config.work_mode == "online":
         from src.repository import extract_dependencies
         try:
@@ -74,12 +77,29 @@ def main(argv: list[str] | None = None) -> int:
                 config.repository_source, 
                 config.package_name
             )
-            print(f"Прямые зависимости {config.package_name}:")
-            for dep in deps:
-                print(f"  - {dep}")
+            graph[config.package_name] = deps
+            for d in deps:
+                graph[d] = []
         except Exception as exc:
             print(f"Ошибка: {exc}", file=sys.stderr)
             return EXIT_CONFIG_ERROR
+    else:
+        from src.test_repo import load_test_repo
+        try:
+            graph = load_test_repo(config.repository_source)
+        except Exception as exc:
+            print(f"Ошибка: {exc}", file=sys.stderr)
+            return EXIT_CONFIG_ERROR
+
+    print(f"Транзитивные зависимости {config.package_name} (BFS):")
+    deps = bfs_dependencies(
+        config.package_name,
+        graph,
+        config.max_depth,
+        config.filter_substring
+    )
+    for dep in deps:
+        print(f"  - {dep}")
             
     return EXIT_OK
 
