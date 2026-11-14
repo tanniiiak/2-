@@ -16,7 +16,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Собирает парсер аргументов командной строки."""
     parser = argparse.ArgumentParser(
         prog="depviz",
-        description="Визуализатор графа (этап 1).",
+        description="Визуализатор графа (этап 1-2).",
     )
     parser.add_argument(
         "-c",
@@ -65,6 +65,22 @@ def main(argv: list[str] | None = None) -> int:
         return EXIT_CONFIG_ERROR
 
     print_config(config)
+    print("---")
+    
+    if config.work_mode == "online":
+        from src.repository import extract_dependencies
+        try:
+            deps = extract_dependencies(
+                config.repository_source, 
+                config.package_name
+            )
+            print(f"Прямые зависимости {config.package_name}:")
+            for dep in deps:
+                print(f"  - {dep}")
+        except Exception as exc:
+            print(f"Ошибка: {exc}", file=sys.stderr)
+            return EXIT_CONFIG_ERROR
+            
     return EXIT_OK
 
 
