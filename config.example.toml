@@ -4,3 +4,4 @@ repository_source = "test_repo.txt"
 work_mode = "test"
 filter_substring = "-dev"
 max_depth = 3
+reverse_mode = true

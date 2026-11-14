@@ -6,7 +6,7 @@ from pathlib import Path
 
 from src.config import AppConfig, load_config
 from src.errors import ConfigError
-from src.bfs import bfs_dependencies
+from src.bfs import bfs_dependencies, reverse_graph
 
 EXIT_OK = 0
 EXIT_CONFIG_ERROR = 1
@@ -17,7 +17,7 @@ def build_parser() -> argparse.ArgumentParser:
     """Собирает парсер аргументов командной строки."""
     parser = argparse.ArgumentParser(
         prog="depviz",
-        description="Визуализатор графа (этап 1-3).",
+        description="Визуализатор графа (этап 1-4).",
     )
     parser.add_argument(
         "-c",
@@ -50,6 +50,7 @@ def print_config(config: AppConfig) -> None:
         f"{format_value(config.filter_substring)}"
     )
     print(f"max_depth={format_value(config.max_depth)}")
+    print(f"reverse_mode={format_value(config.reverse_mode)}")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -91,7 +92,12 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Ошибка: {exc}", file=sys.stderr)
             return EXIT_CONFIG_ERROR
 
-    print(f"Транзитивные зависимости {config.package_name} (BFS):")
+    if config.reverse_mode:
+        graph = reverse_graph(graph)
+        print(f"Обратные зависимости {config.package_name} (BFS):")
+    else:
+        print(f"Транзитивные зависимости {config.package_name} (BFS):")
+
     deps = bfs_dependencies(
         config.package_name,
         graph,

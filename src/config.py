@@ -35,6 +35,7 @@ class AppConfig:
     work_mode: str
     filter_substring: str
     max_depth: int
+    reverse_mode: bool
 
 
 def load_toml(path: Path) -> dict:
@@ -125,12 +126,17 @@ def validate(data: dict) -> AppConfig:
     if not isinstance(max_depth, int):
         raise ConfigTypeError("max_depth должен быть числом")
 
+    reverse_mode = data.get("reverse_mode", False)
+    if not isinstance(reverse_mode, bool):
+        raise ConfigTypeError("reverse_mode должен быть true/false")
+
     return AppConfig(
         package_name=data["package_name"],
         repository_source=data["repository_source"],
         work_mode=data["work_mode"],
         filter_substring=data["filter_substring"],
         max_depth=max_depth,
+        reverse_mode=reverse_mode,
     )
 
 
